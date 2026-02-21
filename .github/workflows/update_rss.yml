@@ -1,0 +1,37 @@
+name: 每日自動更新澳門日報 RSS
+
+on:
+  schedule:
+    # 這裡使用 UTC 時間，00:30 UTC 等於澳門時間 (UTC+8) 早上 08:30
+    # 每天早上 8:30 自動跑一次
+    - cron: '30 0 * * *'
+  workflow_dispatch: # 允許在 GitHub 網頁上手動點擊 "Run workflow" 執行
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write # 允許 Action 寫入與提交程式碼到 repo
+
+    steps:
+    - name: 📥 簽出程式碼 (Checkout repository)
+      uses: actions/checkout@v4
+
+    - name: 🐍 設定 Python 環境
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: 📦 安裝依賴套件
+      run: pip install -r requirements.txt
+
+    - name: 🚀 執行爬蟲腳本生成 rss.xml
+      run: python main.py
+
+    - name: 💾 提交並推送到 GitHub (Commit and Push)
+      uses: stefanzweifel/git-auto-commit-action@v5
+      with:
+        commit_message: "📝 自動更新 rss.xml"
+        file_pattern: 'rss.xml'
