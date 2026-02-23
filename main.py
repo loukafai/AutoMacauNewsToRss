@@ -22,7 +22,6 @@ def ping_websub(feed_url):
     }
     try:
         response = requests.post(hub_url, data=data, timeout=10)
-        # WebSub 成功通常回傳 204 No Content 或 200 OK
         if response.status_code in [200, 204]:
             print("✅ 成功 Ping WebSub Hub！Feedly 稍後將收到即時更新通知。")
         else:
@@ -80,6 +79,72 @@ def fetch_single_article(i, link, headers):
         print(f"❌ 抓取失敗: {link} - {str(e)}")
         return (i, "抓取失敗", link, f"<p>錯誤: {str(e)}</p>", "抓取失敗")
 
+def generate_index_html(results, date_str):
+    """新增：產生帶有 TOC 目錄的 HTML 閱讀頁面"""
+    now_str = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
+    
+    toc_html = '<ul style="list-style: none; padding: 0; line-height: 2;">'
+    articles_html = ""
+    
+    for r in results:
+        idx, title, link, content, summary = r
+        # 建立目錄項
+        toc_html += f'<li><a href="#news-{idx}" style="text-decoration: none; color: #0056b3;">• {title}</a></li>'
+        # 建立內容區塊，加上 id 作為跳轉目標
+        articles_html += f"""
+        <div id="news-{idx}" style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 40px; scroll-margin-top: 20px;">
+            <h2 style="border-left: 5px solid #d32f2f; padding-left: 15px; margin-top: 0;">
+                <a href="{link}" target="_blank" style="text-decoration: none; color: #333;">{title}</a>
+            </h2>
+            <div style="font-size: 1.1em; line-height: 1.8;">{content}</div>
+            <div style="text-align: right; margin-top: 20px;">
+                <a href="#top" style="font-size: 0.9em; color: #888; text-decoration: none;">↑ 回到頂部</a>
+            </div>
+        </div>
+        """
+    toc_html += '</ul>'
+
+    return f"""
+    <!DOCTYPE html>
+    <html lang="zh-HK" style="scroll-behavior: smooth;">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>澳門日報 - {date_str}</title>
+        <style>
+            body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; color: #333; }}
+            .container {{ max-width: 800px; margin: 0 auto; }}
+            header {{ text-align: center; margin-bottom: 30px; }}
+            .toc-container {{ background: #ebebeb; padding: 20px; border-radius: 8px; margin-bottom: 40px; }}
+            img {{ max-width: 100%; height: auto; display: block; margin: 0 auto; border-radius: 4px; }}
+            @media (max-width: 600px) {{ body {{ padding: 10px; }} .toc-container {{ padding: 15px; }} }}
+        </style>
+    </head>
+    <body>
+        <div class="container" id="top">
+            <header>
+                <h1 style="color: #d32f2f; margin-bottom: 10px;">澳門日報 - {date_str}</h1>
+                <p style="margin: 0; color: #666;">更新時間：{now_str} (GMT+8)</p>
+                <p style="margin: 10px 0;"><a href="rss.xml" style="background: #ff6600; color: white; padding: 4px 12px; border-radius: 4px; text-decoration: none; font-size: 0.9em;">RSS 訂閱</a></p>
+            </header>
+
+            <nav class="toc-container">
+                <h3 style="margin-top: 0; border-bottom: 1px solid #ccc; padding-bottom: 10px;">今日新聞目錄</h3>
+                {toc_html}
+            </nav>
+
+            <main>
+                {articles_html}
+            </main>
+            
+            <footer style="text-align: center; color: #888; margin: 50px 0; font-size: 0.9em;">
+                本頁面由自動抓取程式生成，僅供個人閱讀參考。
+            </footer>
+        </div>
+    </body>
+    </html>
+    """
+
 def start_multi_threaded_crawler(target_url, feed_url, num_threads=8):
     headers = {
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0"
@@ -89,7 +154,7 @@ def start_multi_threaded_crawler(target_url, feed_url, num_threads=8):
     try:
         res = requests.get(target_url, headers=headers, timeout=15)
         if res.status_code != 200:
-            return None
+            return None, None
 
         res.encoding = 'utf-8'
         soup = BeautifulSoup(res.text, 'html.parser')
@@ -102,7 +167,7 @@ def start_multi_threaded_crawler(target_url, feed_url, num_threads=8):
         article_links = list(dict.fromkeys(links))
         total = len(article_links)
         
-        if total == 0: return None
+        if total == 0: return None, None
 
         print(f"🚀 找到 {total} 篇文章，啟動 {num_threads} 線程處理中...")
         results = []
@@ -126,7 +191,7 @@ def start_multi_threaded_crawler(target_url, feed_url, num_threads=8):
         rfc_date = email.utils.format_datetime(pub_dt)
         last_build_date = email.utils.format_datetime(datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))))
 
-        # 加入 xmlns:atom 命名空間與 WebSub 核心宣告
+        # --- XML 輸出部分 (保持原封不動) ---
         xml_parts = [
             '<?xml version="1.0" encoding="UTF-8"?>',
             '<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">',
@@ -143,7 +208,6 @@ def start_multi_threaded_crawler(target_url, feed_url, num_threads=8):
 
         for r in results:
             idx, title, link, content, summary = r
-            
             safe_title = saxutils.escape(title)
             safe_link = saxutils.escape(link)
             
@@ -158,15 +222,18 @@ def start_multi_threaded_crawler(target_url, feed_url, num_threads=8):
 
         xml_parts.append('  </channel>')
         xml_parts.append('</rss>')
+        # --- XML 結束 ---
 
-        return "\n".join(xml_parts)
+        # 產生帶目錄的 HTML
+        html_content = generate_index_html(results, date_str)
+
+        return "\n".join(xml_parts), html_content
 
     except Exception as e:
         print(f"❌ 發生嚴重錯誤: {e}")
-        return None
+        return None, None
 
 if __name__ == "__main__":
-    # 您的真實 GitHub Raw 網址
     GITHUB_RAW_URL = "https://raw.githubusercontent.com/loukafai/AutoMacauNewsToRss/refs/heads/main/rss.xml"
 
     tz = datetime.timezone(datetime.timedelta(hours=8))
@@ -175,19 +242,23 @@ if __name__ == "__main__":
     formatted_date = now.strftime("%Y-%m/%d")
     today_url = f"https://www.macaodaily.com/html/{formatted_date}/node_1.htm"
     
-    xml_content = start_multi_threaded_crawler(today_url, GITHUB_RAW_URL, num_threads=8)
+    xml_content, html_content = start_multi_threaded_crawler(today_url, GITHUB_RAW_URL, num_threads=8)
     
     if not xml_content:
         print("🔄 今天報紙尚未更新，自動退回嘗試抓取昨天的報紙...")
         yesterday = now - datetime.timedelta(days=1)
         formatted_date_yesterday = yesterday.strftime("%Y-%m/%d")
         yesterday_url = f"https://www.macaodaily.com/html/{formatted_date_yesterday}/node_1.htm"
-        xml_content = start_multi_threaded_crawler(yesterday_url, GITHUB_RAW_URL, num_threads=8)
+        xml_content, html_content = start_multi_threaded_crawler(yesterday_url, GITHUB_RAW_URL, num_threads=8)
     
     if xml_content:
         with open("rss.xml", "w", encoding="utf-8") as f:
             f.write(xml_content)
         print("✅ 成功生成 rss.xml！")
         
-        # 發送 Ping 給 WebSub 伺服器，告知 Feedly 立刻來抓更新
+        if html_content:
+            with open("index.html", "w", encoding="utf-8") as f:
+                f.write(html_content)
+            print("✅ 成功生成帶目錄的 index.html！")
+        
         ping_websub(GITHUB_RAW_URL)
