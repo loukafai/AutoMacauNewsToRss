@@ -150,8 +150,7 @@ def start_multi_threaded_crawler(target_url, feed_url, num_threads=8):
             xml_parts.append('    <item>')
             xml_parts.append(f'      <title>{safe_title}</title>')
             xml_parts.append(f'      <link>{safe_link}</link>')
-            # 升級到 #v7，確保 Feedly 收到 WebSub 通知後抓取的是最新文章
-            xml_parts.append(f'      <guid isPermaLink="false">{safe_link}#v7</guid>')
+            xml_parts.append(f'      <guid isPermaLink="true">{safe_link}</guid>')
             xml_parts.append(f'      <pubDate>{rfc_date}</pubDate>')
             xml_parts.append(f'      <description><![CDATA[{summary}]]></description>')
             xml_parts.append(f'      <content:encoded><![CDATA[{content}]]></content:encoded>')
