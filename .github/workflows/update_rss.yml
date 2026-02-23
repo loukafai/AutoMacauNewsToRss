@@ -2,9 +2,9 @@ name: 每日自動更新澳門日報 RSS
 
 on:
   schedule:
-    # 這裡使用 UTC 時間，00:30 UTC 等於澳門時間 (UTC+8) 早上 08:30
-    # 每天早上 8:30 自動跑一次
-    - cron: '30 22 * * *'
+    # 澳門時間 07:00 (UTC+8) = UTC 23:00 (前一天)
+    # 格式：分 時 日 月 週
+    - cron: '0 21 * * *'
   workflow_dispatch: # 允許在 GitHub 網頁上手動點擊 "Run workflow" 執行
 
 jobs:
@@ -25,13 +25,19 @@ jobs:
         cache: 'pip'
 
     - name: 📦 安裝依賴套件
-      run: pip install -r requirements.txt
+      run: |
+        if [ -f requirements.txt ]; then
+          pip install -r requirements.txt
+        else
+          pip install requests beautifulsoup4
+        fi
 
-    - name: 🚀 執行爬蟲腳本生成 rss.xml
+    - name: 🚀 執行爬蟲腳本生成檔案
       run: python main.py
 
     - name: 💾 提交並推送到 GitHub (Commit and Push)
       uses: stefanzweifel/git-auto-commit-action@v5
       with:
-        commit_message: "📝 自動更新 rss.xml"
-        file_pattern: 'rss.xml'
+        commit_message: "📝 自動更新今日新聞 (RSS & HTML)"
+        # 同時監控並提交這兩個檔案的變動
+        file_pattern: 'rss.xml index.html'
