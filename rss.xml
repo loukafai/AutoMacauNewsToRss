@@ -6,7 +6,7 @@
     <description>澳門日報當日新聞自動抓取訂閱源</description>
     <language>zh-hk</language>
     <pubDate>Tue, 24 Feb 2026 08:00:00 +0800</pubDate>
-    <lastBuildDate>Tue, 24 Feb 2026 03:45:16 +0800</lastBuildDate>
+    <lastBuildDate>Tue, 24 Feb 2026 05:34:21 +0800</lastBuildDate>
     <atom:link href="https://raw.githubusercontent.com/loukafai/AutoMacauNewsToRss/refs/heads/main/rss.xml" rel="self" type="application/rss+xml" />
     <atom:link href="https://pubsubhubbub.appspot.com/" rel="hub" />
     <item>
