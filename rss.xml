@@ -6,7 +6,7 @@
     <description>澳門日報當日新聞自動抓取訂閱源</description>
     <language>zh-hk</language>
     <pubDate>Fri, 07 Aug 2026 08:00:00 +0800</pubDate>
-    <lastBuildDate>Fri, 07 Aug 2026 08:59:18 +0800</lastBuildDate>
+    <lastBuildDate>Sat, 08 Aug 2026 05:27:29 +0800</lastBuildDate>
     <atom:link href="https://raw.githubusercontent.com/loukafai/AutoMacauNewsToRss/refs/heads/main/rss.xml" rel="self" type="application/rss+xml" />
     <atom:link href="https://pubsubhubbub.appspot.com/" rel="hub" />
     <item>
@@ -146,12 +146,12 @@
       <content:encoded><![CDATA[<figure style="margin-bottom: 20px;"><img src="https://www.macaodaily.com/res/1/20260807/43281786039160624.jpg" style="max-width:100%; height:auto;" /></figure><p>倫斯泰特大馬路全日禁泊</p><p>【本報消息】交通事務局訊：因應新口岸區交通日趨繁忙，經檢視區內道路及公共停車場的使用情況，倫斯泰特大馬路將由設有夜間時限性泊車區調整為全日禁止泊車，以進一步理順該區交通秩序。</p><p>相關標誌調整工作於八月七日至八月八日期間進行，屆時上述路段將實施有限度通車。</p><p>交通局會於相關路段設置大黃牌以作提醒，呼籲駕駛者留意有關安排，並可按需使用宋玉生廣場停車場及藝園停車場。</p>]]></content:encoded>
     </item>
     <item>
-      <title>大潭山步行徑維修部分圍封</title>
+      <title>抓取失敗</title>
       <link>https://www.macaodaily.com/html/2026-08/07/content_1925592.htm</link>
       <guid isPermaLink="true">https://www.macaodaily.com/html/2026-08/07/content_1925592.htm</guid>
       <pubDate>Fri, 07 Aug 2026 08:00:00 +0800</pubDate>
-      <description><![CDATA[大潭山步行徑維修部分圍封 【本報消息】市政署訊：由於大潭山步行徑部分路段出現沉降情況，為保障公眾安全，市政署正進行維修工程，施工路段須臨時圍封，禁止或有限度通行，敬請居民留意現場指示，切勿進入圍封範圍。 料工程九月內完成 是次維修路段包括大潭山步行徑“T1”入口至大潭山茶花園，以及大潭山眺望台至標距...]]></description>
-      <content:encoded><![CDATA[<figure style="margin-bottom: 20px;"><img src="https://www.macaodaily.com/res/1/20260807/83781786039160812.jpg" style="max-width:100%; height:auto;" /></figure><p>大潭山步行徑維修部分圍封</p><p>【本報消息】市政署訊：由於大潭山步行徑部分路段出現沉降情況，為保障公眾安全，市政署正進行維修工程，施工路段須臨時圍封，禁止或有限度通行，敬請居民留意現場指示，切勿進入圍封範圍。</p><p>料工程九月內完成</p><p>是次維修路段包括大潭山步行徑“T1”入口至大潭山茶花園，以及大潭山眺望台至標距柱“2-01-06”的路段，工程主要維修上述步行徑開裂及沉降的瀝青路面，包括回填、穩固路基，臨時移除並恢復電力、供排水設施等。預計工程於九月內完成，實際工期可能因天氣及其他因素而延長。</p><p>工程期間部分路段須臨時封閉或局部圍封，市政署提醒居民須留意圍封安排，避免靠近以免發生意外。施工期間對公眾造成不便，敬請見諒。如有查詢，可致電市政署市民服務熱線二八三三·七六七六。</p>]]></content:encoded>
+      <description><![CDATA[抓取失敗]]></description>
+      <content:encoded><![CDATA[<p>錯誤: HTTPSConnectionPool(host='www.macaodaily.com', port=443): Max retries exceeded with url: /html/2026-08/07/content_1925592.htm (Caused by ConnectTimeoutError(<HTTPSConnection(host='www.macaodaily.com', port=443) at 0x7f4ba4428f10>, 'Connection to www.macaodaily.com timed out. (connect timeout=15)'))</p>]]></content:encoded>
     </item>
     <item>
       <title>高溫酷熱慎防中暑</title>
@@ -362,12 +362,12 @@
       <content:encoded><![CDATA[<p>加強宣導“鍵盤責任”</p><p>近日外國一名網紅因追星相關風波，遭受大規模網絡霸凌，最終於住處直播期間輕生。這樁悲劇不只震驚當地演藝圈，亦為各地網絡環境敲響警鐘，提醒螢幕隔絕之下，輕易出口的惡言，往往藏着足以摧毀一個生命的重量。</p><p>網絡空間容易被認為無拘無束，不少人倚仗匿名身份，肆意發表尖酸刻薄的言論，針對追星族群的攻擊尤為常見。只因立場不同，便招致謾罵、圍攻、人肉搜尋，種種霸凌層出不窮。眾人在鍵盤上逞一時口舌之快，未思索話語落到當事人身上，會造成何等沉重的精神負擔。人言可畏，足以壓垮人。</p><p>回望本澳，隨着社交平台普及，追星、興趣社群日漸龐大，同類矛盾亦潛藏其間。為防範網絡霸凌橫生，社會各界應加強宣導，令居民明白“鍵盤責任”，匿名不等於可以肆意傷人。各大社交平台須強化內容把關，對於圍攻、人身攻擊內容快速處理，封禁惡意帳號。學校與社團可開展情緒教育課程，教導青少年理性表達意見，懂得尊重他人喜好。</p><p>悅鳴</p>]]></content:encoded>
     </item>
     <item>
-      <title>“耆樂星聲”唱歌賽十組晉決</title>
+      <title>抓取失敗</title>
       <link>https://www.macaodaily.com/html/2026-08/07/content_1925620.htm</link>
       <guid isPermaLink="true">https://www.macaodaily.com/html/2026-08/07/content_1925620.htm</guid>
       <pubDate>Fri, 07 Aug 2026 08:00:00 +0800</pubDate>
-      <description><![CDATA[“耆樂星聲”唱歌賽十組晉決 敬老總會主辦、澳門基金會贊助的“二○二六老年好聲音之‘耆樂星聲’”唱歌比賽初賽，日前一連兩日在民眾建澳聯盟禮堂舉行。賽事聚焦長者文體發展，讓長者在歌聲中盡情綻放活力、感受愉悅。共四十組參賽者參與。 參賽長者提早到場練習，互相整理妝容。演唱曲目涵蓋經典金曲《偏偏喜歡你》、《...]]></description>
-      <content:encoded><![CDATA[<figure style="margin-bottom: 20px;"><img src="https://www.macaodaily.com/res/1/20260807/48831786039164968.jpg" style="max-width:100%; height:auto;" /></figure><p>“耆樂星聲”唱歌賽十組晉決</p><p>敬老總會主辦、澳門基金會贊助的“二○二六老年好聲音之‘耆樂星聲’”唱歌比賽初賽，日前一連兩日在民眾建澳聯盟禮堂舉行。賽事聚焦長者文體發展，讓長者在歌聲中盡情綻放活力、感受愉悅。共四十組參賽者參與。</p><p>參賽長者提早到場練習，互相整理妝容。演唱曲目涵蓋經典金曲《偏偏喜歡你》、《中國人》以及十人合唱《映山紅》等。比賽邀請主持人及歌手陳偉成、民眾頤菁中心資深歌唱導師曾雅玲，以及澳門女歌手羅凱瑩擔任評委，從音準節奏、造型、整體呈現等綜合評分。最終十組參賽者成功晉級決賽，另評選出“最佳服裝獎”及“最佳台風獎”各兩組。</p>]]></content:encoded>
+      <description><![CDATA[抓取失敗]]></description>
+      <content:encoded><![CDATA[<p>錯誤: HTTPSConnectionPool(host='www.macaodaily.com', port=443): Max retries exceeded with url: /html/2026-08/07/content_1925620.htm (Caused by ConnectTimeoutError(<HTTPSConnection(host='www.macaodaily.com', port=443) at 0x7f4ba44e0a90>, 'Connection to www.macaodaily.com timed out. (connect timeout=15)'))</p>]]></content:encoded>
     </item>
     <item>
       <title>動物流身心體驗分享會報名</title>
@@ -674,12 +674,12 @@
       <content:encoded><![CDATA[<figure style="margin-bottom: 20px;"><img src="https://www.macaodaily.com/res/1/20260807/94251786039201155.jpg" style="max-width:100%; height:auto;" /></figure><p>籌建科技產業園工作組會議</p><p>岑浩輝：滿意進度  超前部署引才</p><p>【本報消息】行政長官岑浩輝昨日主持召開籌建科技研發產業園工作組二○二六年第一次會議，就推動澳門科技研發產業園的總體建設進行討論。會議上，工作組成員及項目設計團隊分別就科技園建設相關的工作進度、招商進度、修改城市總體規劃進度、未來工作計劃及園區設計方案等進行匯報。</p><p>務求按時完成基建</p><p>行政長官滿意籌建科技園的工作進度，亦充分肯定各與會官員就建設好園區提出的意見，並感謝中關村等合作單位的配合和支持。他要求各相關部門緊密協作，加快工作步伐，務求按時完成各項基建，以及高質量達至既定目標。園區設計方面，需要為科技園投入運作後的持續發展預留適當空間。同時應超前部署引入科技人才的各項相關工作，作多方面考慮，以吸引更多高質素人才進駐科技園。</p><p>保首階段如期達成</p><p>經濟財政司司長吳惠嫻表示，在行政長官的指導下，各部門與合作單位積極投入與協作，產業園項目得以有序推進。下一階段工作將涉及更多領域，時程也將更為緊湊，期望各部門維持高強度節奏，嚴格按照整體進度落實各項工作，確保首階段建設目標如期達成。</p><p>出席會議的還有社會文化司司長柯嵐、運輸工務司司長譚偉文、行政法務司司長辦公室主任曾翔、經濟財政司司長辦公室主任羅志輝、各相關局級部門的領導，以及中關村發展集團股份有限公司集團、北京市工業設計研究院的代表。</p>]]></content:encoded>
     </item>
     <item>
-      <title>大健康企參展冀拓葡語市場</title>
+      <title>抓取失敗</title>
       <link>https://www.macaodaily.com/html/2026-08/07/content_1925658.htm</link>
       <guid isPermaLink="true">https://www.macaodaily.com/html/2026-08/07/content_1925658.htm</guid>
       <pubDate>Fri, 07 Aug 2026 08:00:00 +0800</pubDate>
-      <description><![CDATA[大健康企參展冀拓葡語市場 【本報消息】參與粵澳名優商品展的中醫藥大健康企業，期望對接各地客商，讓品牌深耕本地市場，拓展海外市場的機會。 新寶堂澳門醫藥有限公司執行董事、箐沐貿易副董事長劉婉晴表示，新寶堂去年首次參展，察覺本澳消費市場潛力龐大，今年再度參展擴大知名度。本次主要宣傳陳皮水及酵素飲品。目前...]]></description>
-      <content:encoded><![CDATA[<figure style="margin-bottom: 20px;"><img src="https://www.macaodaily.com/res/1/20260807/66781786039201249.jpg" style="max-width:100%; height:auto;" /></figure><figure style="margin-bottom: 20px;"><img src="https://www.macaodaily.com/res/1/20260807/51391786039201249.jpg" style="max-width:100%; height:auto;" /></figure><p>大健康企參展冀拓葡語市場</p><p>【本報消息】參與粵澳名優商品展的中醫藥大健康企業，期望對接各地客商，讓品牌深耕本地市場，拓展海外市場的機會。</p><p>新寶堂澳門醫藥有限公司執行董事、箐沐貿易副董事長劉婉晴表示，新寶堂去年首次參展，察覺本澳消費市場潛力龐大，今年再度參展擴大知名度。本次主要宣傳陳皮水及酵素飲品。目前已完整鋪設大灣區經銷網絡，正致力推動產品覆蓋澳門多元零售市場。澳門大健康市場潛力十足，輕養生產品對本地居民有一定吸引力，自家即飲系列產品亦契合本地快節奏生活。</p><p>談及澳門市場價值指出，澳門是粵港澳大灣區重要城市，同時擁有中葡平台獨特優勢，品牌將透過澳門平台積極尋找合作機會，將中式養生飲品拓展至葡語系國家與海外市場，亦正計劃拓展東南亞、歐洲、美洲市場。</p>]]></content:encoded>
+      <description><![CDATA[抓取失敗]]></description>
+      <content:encoded><![CDATA[<p>錯誤: HTTPSConnectionPool(host='www.macaodaily.com', port=443): Max retries exceeded with url: /html/2026-08/07/content_1925658.htm (Caused by ConnectTimeoutError(<HTTPSConnection(host='www.macaodaily.com', port=443) at 0x7f4ba435fc40>, 'Connection to www.macaodaily.com timed out. (connect timeout=15)'))</p>]]></content:encoded>
     </item>
     <item>
       <title>酒店協會名優展探合作</title>
@@ -1034,12 +1034,12 @@
       <content:encoded><![CDATA[<figure style="margin-bottom: 20px;"><img src="https://www.macaodaily.com/res/1/20260807/43261786037745046.jpg" style="max-width:100%; height:auto;" /></figure><p>覆蓋逾一百八十萬人</p><p>啟德醫院首階段十月運作</p><p>【香港中通社六日電】香港醫務衛生局長盧寵茂六日到訪即將開院的啟德醫院，了解新醫院設施及首階段運作的準備工作和服務安排。盧寵茂表示，醫院會分兩階段投入服務，首階段服務將於今年十月展開，第二階段將於二○二八年投入服務。</p><p>盧寵茂指出，啟德醫院將取代伊利沙伯醫院成為九龍中聯網的龍頭醫院，服務範圍覆蓋油尖旺、九龍城、黃大仙以及觀塘等區域，覆蓋人口超過一百八十萬人。啟德醫院亦會為毗連的香港兒童醫院提供臨床支援，有助鞏固香港兒童醫院作為第三層兒童專科卓越醫療中心的角色。</p><p>啟德醫院總建築樓面面積達五十萬平方米，提供二千四百張病床，全面啓用後將成為香港規模最大的公立醫院。</p><p>醫院會分兩階段投入服務。首階段服務將於今年十月展開，除家庭醫學綜合中心外，內科、外科、神經外科、家庭醫學及腫瘤科（部分舊症）的專科門診服務，以及專職醫療、診斷和放射治療等配套服務亦會陸續轉移至新醫院。</p><p>第二階段工程，醫院餘下的三座大樓——急症大樓、行政大樓和教學及培訓大樓的工程進度合符預期，預計急症室、住院和手術等餘下的臨床服務將於二○二八年投入服務。</p>]]></content:encoded>
     </item>
     <item>
-      <title>抓取失敗</title>
+      <title>新皇崗口岸將設無感測溫系統</title>
       <link>https://www.macaodaily.com/html/2026-08/07/content_1925550.htm</link>
       <guid isPermaLink="true">https://www.macaodaily.com/html/2026-08/07/content_1925550.htm</guid>
       <pubDate>Fri, 07 Aug 2026 08:00:00 +0800</pubDate>
-      <description><![CDATA[抓取失敗]]></description>
-      <content:encoded><![CDATA[<p>錯誤: HTTPSConnectionPool(host='www.macaodaily.com', port=443): Max retries exceeded with url: /html/2026-08/07/content_1925550.htm (Caused by ConnectTimeoutError(<HTTPSConnection(host='www.macaodaily.com', port=443) at 0x7f08c4652020>, 'Connection to www.macaodaily.com timed out. (connect timeout=15)'))</p>]]></content:encoded>
+      <description><![CDATA[新皇崗口岸將設無感測溫系統 【香港中通社六日電】皇崗口岸港方口岸區已經正式成立，並由香港特區依照本地法律實施管轄。香港衛生署六日表示，會於入境大堂設置集體式紅外線熱像儀體溫偵測系統，可同時為大量旅客進行無感檢測體溫，保障旅客暢順通關。 香港衛生署長林文健日前到港方口岸區視察，了解署方在港方口岸區的衛...]]></description>
+      <content:encoded><![CDATA[<p>新皇崗口岸將設無感測溫系統</p><p>【香港中通社六日電】皇崗口岸港方口岸區已經正式成立，並由香港特區依照本地法律實施管轄。香港衛生署六日表示，會於入境大堂設置集體式紅外線熱像儀體溫偵測系統，可同時為大量旅客進行無感檢測體溫，保障旅客暢順通關。</p><p>香港衛生署長林文健日前到港方口岸區視察，了解署方在港方口岸區的衛生檢疫設施與相關準備工作的最新情況。他指出，會於入境大堂設置集體式紅外線熱像儀體溫偵測系統，同時為大量旅客進行無感檢測體溫。</p><p>車道方面，“信息採集一體機”兼備體溫探測功能，車輛駛入聯合一站式車道，即可進行五方查驗安排，通過信息採集一體機一次過完成體溫檢測、旅行證件資料、面容特徵和指紋採集等各項工作。署方在衛生檢疫的創新高效設置和措施，進一步提升防控疾病跨域傳播，守好國家南大門。</p><p>他表示，皇崗口岸高效通關，不僅便利人員往來，亦將便利深化跨境衛生和健康協作，助力區域公共衛生體系建設。</p>]]></content:encoded>
     </item>
     <item>
       <title>全球首艘光伏發電汽車船交付</title>
@@ -1346,12 +1346,12 @@
       <content:encoded><![CDATA[<figure style="margin-bottom: 20px;"><img src="https://www.macaodaily.com/res/1/20260807/58421786037165405.jpg" style="max-width:100%; height:auto;" /></figure><p>嘉芙蓮曬劇照被讚保養得宜</p><p>五十六歲美艷女星嘉芙蓮薛達鍾絲(Catherine Zeta-Jones)，近日釋出串流平台Prime Video驚慄劇《Kill Jackie》的首批劇照，狀態凍齡亮眼，引起無數絲巴好奇。劇照之中，嘉芙蓮分別穿上紅色貼身長裙、棕色亮片禮服，以及運動套裝，網民都留言讚她保養得宜，狀態極佳。</p><p>劇中她飾演曾經從事跨國毒品走私的Jackie Price，過去二十年隱姓埋名，周遊各地買賣藝術品，過着奢華日子，不料遭到殺手組織The Seven Demons追殺，她決定重拾昔日本能，先發制人對付殺手，卻發覺自身埋藏的心魔更為可怕。嘉芙蓮曾接受雜誌訪問，分享自己的飲食習慣，平日飲食講求健康，周末便會放縱享用英式早餐與法式多士，拒絕大魚大肉。</p>]]></content:encoded>
     </item>
     <item>
-      <title>節目表</title>
+      <title>抓取失敗</title>
       <link>https://www.macaodaily.com/html/2026-08/07/content_1925500.htm</link>
       <guid isPermaLink="true">https://www.macaodaily.com/html/2026-08/07/content_1925500.htm</guid>
       <pubDate>Fri, 07 Aug 2026 08:00:00 +0800</pubDate>
-      <description><![CDATA[節目表 澳廣視 澳視澳門 16:05 鉛筆塗鴉創意動畫 16:10 開心超人聯盟之平行時空大冒險（第十八季） 16:30 天才小魯班 17:00 少年英雄小哪吒 17:50 青田小田魚（第一季） 17:58 動感教菁 18:38 趣談唐詩 18:43 神州追蹤 18:50 新聞提要 19:00 澳視...]]></description>
-      <content:encoded><![CDATA[<p>節目表</p><p>澳廣視</p><p>澳視澳門</p><p>16:05 鉛筆塗鴉創意動畫</p><p>16:10 開心超人聯盟之平行時空大冒險（第十八季）</p><p>16:30 天才小魯班</p><p>17:00 少年英雄小哪吒</p><p>17:50 青田小田魚（第一季）</p><p>17:58 動感教菁</p><p>18:38 趣談唐詩</p><p>18:43 神州追蹤</p><p>18:50 新聞提要</p><p>19:00 澳視新聞 / 天氣報告</p><p>20:00 如果奔跑是我的人生</p><p>21:33 趨記茶餐廳</p><p>21:57 健康天天問</p><p>22:00 普通話新聞</p><p>澳門體育</p><p>13:15 2026温布頓網球錦標賽：男單8強</p><p>18:40 2026 FIFA世界盃：西班牙 對 沙特阿拉伯</p><p>22:00 2026年超級跑車錦標賽精華：</p><p>第十二集達爾文站</p><p>23:00 2026 FIFA世界盃：突尼斯 對 日本</p><p>澳門資訊</p><p>17:30 新聞報道</p><p>17:50 神州追蹤</p><p>18:00 新聞報道</p><p>18:05 TDM 新視點</p><p>18:07 澳門早晨精華錄</p><p>18:32 灣區全媒睇</p><p>19:00 澳視新聞 / 天氣報告</p><p>19:58 TDM 新視點</p><p>20:00 錄播澳視新聞</p><p>20:57 健康天天問</p><p>21:00 錄播澳視新聞</p><p>22:00 普通話新聞</p><p>22:30 十點半澳視縱橫：澳視新聞檔案</p><p>23:05 育才成長 築新未來：活力動起來</p><p>澳門綜藝</p><p>10:00 賴貓的獅子倒影</p><p>12:56 國寶時刻</p><p>13:01 點心之路</p><p>16:05 星光大道</p><p>17:30 澳門早晨精華錄</p><p>17:58 TDM 新視點</p><p>18:00 桃花貓和東海魚</p><p>18:25 鯤鵬擊浪</p><p>20:00 遊艇鑑賞</p><p>20:30 林則徐 虎門銷煙以外</p><p>21:30 石家河</p><p>22:00 第二十三屆《澳廣視至愛新聽力》</p><p>頒獎音樂會</p><p>無線電視</p><p>翡翠台</p><p>13:00 午間新聞 / 卓越滙談</p><p>13:25 流行都市</p><p>14:10 玩轉深中懶人包</p><p>14:50 東坡家事</p><p>15:50 交易現場</p><p>16:20 櫻桃小丸子 / Hands Up</p><p>17:20 皇家少女樂團 / 財經新聞</p><p>18:00 今日有樓睇 / 潮流生活誌</p><p>18:25 新聞檔案</p><p>18:30 六點半新聞報道</p><p>19:15 世界觀 / 天氣報告</p><p>19:25 有理說得清</p><p>19:30 東張西望之今夜愛回家</p><p>20:00 愛 · 回家之開心速遞</p><p>20:25 全城開心 · 愛回家</p><p>20:30 夫妻的博弈</p><p>明珠台</p><p>13:00 金融行情</p><p>14:55 財經快訊</p><p>15:35 交易直播室</p><p>16:15 普通話新聞報道</p><p>16:30 新造電視</p><p>17:00 恐龍班尼的世界</p><p>17:30 機甲芝麻街</p><p>18:00 靚太西班牙美食行</p><p>18:55 世界真細小</p><p>19:00 食盡全世界</p><p>19:30 新聞報道 / 天氣報告</p><p>19:55 財經消息</p><p>20:00 優遊假期</p><p>20:30 明珠絕色：野性美洲</p><p>21:25 世界真細小</p><p>21:30 明珠消暑精選：King Kong</p><p>TVB Plus</p><p>13:15 美食新聞報道</p><p>13:45 開卷</p><p>14:15 娛樂新聞報道</p><p>14:45 尋找隱世家</p><p>15:15 鬼上你架車2</p><p>15:50 交易現場</p><p>16:20 愛家人物</p><p>16:30 夢想改造家</p><p>18:00 野外步出3玩野加大馬</p><p>18:30 唔滾唔知有料到</p><p>19:00 川內相親</p><p>20:00 富途講美股</p><p>20:05 美食新聞報道</p><p>蓮花衛視</p><p>05:29 經典影院 勇敢的心</p><p>08:28 經典影院 月黑高飛</p><p>10:56 經典影院 贖罪</p><p>12:59 蓮花俱樂部 重播</p><p>14:08 經典影院 巴拿馬裁縫</p><p>16:03 經典影院 神鬼戰士</p><p>19:00 蓮花俱樂部 直播</p><p>20:10 經典影院 天衣無縫</p><p>所有節目以各台最新公佈為準</p>]]></content:encoded>
+      <description><![CDATA[抓取失敗]]></description>
+      <content:encoded><![CDATA[<p>錯誤: HTTPSConnectionPool(host='www.macaodaily.com', port=443): Max retries exceeded with url: /html/2026-08/07/content_1925500.htm (Caused by ConnectTimeoutError(<HTTPSConnection(host='www.macaodaily.com', port=443) at 0x7f4ba430ee60>, 'Connection to www.macaodaily.com timed out. (connect timeout=15)'))</p>]]></content:encoded>
     </item>
     <item>
       <title>視事關心</title>
