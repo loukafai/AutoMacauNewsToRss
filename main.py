@@ -30,6 +30,21 @@ def get_soup(url):
   return None
 
 
+def ping_websub(feed_url):
+  """主動通知 WebSub Hub 進行即時推播，讓 Feedly 秒速收到更新"""
+  hub_url = "https://pubsubhubbub.appspot.com/"
+  print(f"📡 準備發送 WebSub Ping 通知 Hub: {hub_url}")
+  data = {"hub.mode": "publish", "hub.url": feed_url}
+  try:
+    response = requests.post(hub_url, data=data, timeout=10)
+    if response.status_code in [200, 204]:
+      print("✅ 成功 Ping WebSub Hub！Feedly 稍後將收到即時更新通知。")
+    else:
+      print(f"⚠️ Ping WebSub Hub 失敗，HTTP 狀態碼: {response.status_code}")
+  except Exception as e:
+    print(f"⚠️ Ping WebSub Hub 發生錯誤: {e}")
+
+
 def get_all_article_urls(base_column_url, year_month, day):
   """從版面頁自動掃描並萃取出當日所有新聞內文連結"""
   article_urls = []
@@ -256,8 +271,8 @@ def build_html(articles, date_str):
 """
 
 
-def build_rss(articles, date_str):
-  """生成標準的 RSS 2.0 XML 內容"""
+def build_rss(articles, date_str, feed_url):
+  """生成支援 WebSub 與標準 RSS 2.0 的 XML 內容"""
   now_rfc822 = datetime.now(MACAU_TZ).strftime("%a, %d %b %Y %H:%M:%S +0800")
   rss_items = []
 
@@ -278,13 +293,15 @@ def build_rss(articles, date_str):
     </item>""")
 
   rss_xml = f"""<?xml version="1.0" encoding="UTF-8" ?>
-<rss version="2.0">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
 <channel>
     <title><![CDATA[澳門日報每日精讀 - {date_str}]]></title>
     <link>https://github.com</link>
     <description><![CDATA[自動抓取、清理廣告並重新排版的澳門日報精選內容]]></description>
     <language>zh-Hant</language>
     <lastBuildDate>{now_rfc822}</lastBuildDate>
+    <atom:link href="{feed_url}" rel="self" type="application/rss+xml" />
+    <atom:link href="https://pubsubhubbub.appspot.com/" rel="hub" />
     {''.join(rss_items)}
 </channel>
 </rss>"""
@@ -292,6 +309,9 @@ def build_rss(articles, date_str):
 
 
 def main():
+  # 請替換為你真實的 GitHub raw rss.xml 網址
+  GITHUB_RAW_URL = "https://raw.githubusercontent.com/loukafai/AutoMacauNewsToRss/main/rss.xml"
+
   now = datetime.now(MACAU_TZ)
   year_month = now.strftime("%Y%m")
   day = now.strftime("%d")
@@ -339,8 +359,11 @@ def main():
 
     rss_output_path = "rss.xml"
     with open(rss_output_path, "w", encoding="utf-8") as f:
-      f.write(build_rss(articles, date_str))
+      f.write(build_rss(articles, date_str, GITHUB_RAW_URL))
     print(f"📡 成功生成 RSS 訂閱檔（根目錄）：{rss_output_path}")
+
+    # 主動通知 WebSub Hub 進行即時推播更新
+    ping_websub(GITHUB_RAW_URL)
 
   else:
     print("❌ 未能成功解析任何新聞內文。")
