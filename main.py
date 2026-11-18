@@ -1,264 +1,350 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from datetime import datetime, timedelta, timezone
+import os
+import re
+import time
+from urllib.parse import urljoin
 import requests
 from bs4 import BeautifulSoup
-from urllib.parse import urljoin
-import re
-import datetime
-import email.utils
-import xml.sax.saxutils as saxutils
-from concurrent.futures import ThreadPoolExecutor, as_completed
-import os
 
-def clean_xml_text(text):
-    """移除可能導致 XML 崩潰的隱藏控制字元"""
-    return re.sub(r'[\x00-\x08\x0b\x0c\x0e-\x1f]', '', text)
+# 設定澳門時區 (UTC+8)
+MACAU_TZ = timezone(timedelta(hours=8))
 
-def ping_websub(feed_url):
-    """主動通知 WebSub Hub 進行即時推播"""
-    hub_url = "https://pubsubhubbub.appspot.com/"
-    print(f"📡 準備發送 WebSub Ping 通知 Hub: {hub_url}")
-    data = {
-        "hub.mode": "publish",
-        "hub.url": feed_url
-    }
-    try:
-        response = requests.post(hub_url, data=data, timeout=10)
-        if response.status_code in [200, 204]:
-            print("✅ 成功 Ping WebSub Hub！Feedly 稍後將收到即時更新通知。")
-        else:
-            print(f"⚠️ Ping WebSub Hub 失敗，HTTP 狀態碼: {response.status_code}")
-    except Exception as e:
-        print(f"⚠️ Ping WebSub Hub 發生錯誤: {e}")
+HEADERS = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,"
+        " like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    )
+}
 
-def fetch_single_article(i, link, headers):
-    try:
-        r = requests.get(link, headers=headers, timeout=15)
-        r.encoding = 'utf-8'
-        raw_html = r.text
 
-        title_match = re.search(r'<founder-title>(.*?)</founder-title>', raw_html, re.DOTALL)
-        final_title = title_match.group(1).strip() if title_match else "無標題"
-        final_title = clean_xml_text(final_title.replace('<![CDATA[', '').replace(']]>', ''))
+def get_soup(url):
+  """發送請求並回傳 BeautifulSoup 物件"""
+  try:
+    resp = requests.get(url, headers=HEADERS, timeout=15)
+    resp.encoding = "utf-8"
+    if resp.status_code == 200:
+      return BeautifulSoup(resp.text, "html.parser")
+  except Exception as e:
+    print(f"❌ 請求錯誤 {url}: {e}")
+  return None
 
-        a_soup = BeautifulSoup(raw_html, 'html.parser')
-        
-        imgs_html = ""
-        for img in a_soup.find_all('img'):
-            src = img.get('src')
-            if src and '/res/' in src:
-                full_img_url = urljoin(link, src)
-                imgs_html += f'<figure style="margin-bottom: 20px;"><img src="{full_img_url}" style="max-width:100%; height:auto;" /></figure>'
 
-        content_div = a_soup.find(id="ozoom")
-        if content_div:
-            for tag in content_div(["script", "style"]):
-                tag.decompose()
-            for br in content_div.find_all("br"):
-                br.replace_with("\n")
-                
-            raw_text = content_div.get_text(separator='\n', strip=True)
-            raw_text = clean_xml_text(raw_text)
-            
-            clean_paragraphs = []
-            for line in raw_text.split('\n'):
-                line = line.strip()
-                if line:
-                    clean_paragraphs.append(f"<p>{line}</p>")
-            
-            content_html = "".join(clean_paragraphs)
-            summary_text = raw_text.replace('\n', ' ')
-            summary = summary_text[:150] + "..." if len(summary_text) > 150 else summary_text
-        else:
-            summary = "無內容"
-            content_html = "<p>（內文擷取失敗）</p>"
+def get_all_article_urls(base_column_url, year_month, day):
+  """從版面頁自動掃描並萃取出當日所有新聞內文連結"""
+  article_urls = []
+  visited_columns = set()
+  columns_to_visit = [base_column_url]
 
-        full_content = f"{imgs_html}{content_html}".replace(']]>', ']]&gt;')
-        summary = summary.replace('<![CDATA[', '').replace(']]>', '')
+  content_pattern = re.compile(rf"/content/{year_month}/{day}/c\d+\.html")
+  column_pattern = re.compile(rf"/column/{year_month}/{day}/col[A-Z0-9]+\.html")
 
-        return (i, final_title, link, full_content, summary)
-    except Exception as e:
-        print(f"❌ 抓取失敗: {link} - {str(e)}")
-        return (i, "抓取失敗", link, f"<p>錯誤: {str(e)}</p>", "抓取失敗")
+  while columns_to_visit:
+    col_url = columns_to_visit.pop(0)
+    if col_url in visited_columns:
+      continue
+    visited_columns.add(col_url)
 
-def generate_index_html(results, date_str):
-    """新增：產生帶有 TOC 目錄的 HTML 閱讀頁面"""
-    now_str = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))).strftime("%Y-%m-%d %H:%M:%S")
-    
-    toc_html = '<ul style="list-style: none; padding: 0; line-height: 2;">'
-    articles_html = ""
-    
-    for r in results:
-        idx, title, link, content, summary = r
-        # 建立目錄項
-        toc_html += f'<li><a href="#news-{idx}" style="text-decoration: none; color: #0056b3;">• {title}</a></li>'
-        # 建立內容區塊，加上 id 作為跳轉目標
-        articles_html += f"""
-        <div id="news-{idx}" style="background: white; padding: 25px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 40px; scroll-margin-top: 20px;">
-            <h2 style="border-left: 5px solid #d32f2f; padding-left: 15px; margin-top: 0;">
-                <a href="{link}" target="_blank" style="text-decoration: none; color: #333;">{title}</a>
-            </h2>
-            <div style="font-size: 1.1em; line-height: 1.8;">{content}</div>
-            <div style="text-align: right; margin-top: 20px;">
-                <a href="#top" style="font-size: 0.9em; color: #888; text-decoration: none;">↑ 回到頂部</a>
+    print(f"🔍 正在掃描版面: {col_url}")
+    soup = get_soup(col_url)
+    if not soup:
+      continue
+
+    for a_tag in soup.find_all("a", href=True):
+      full_url = urljoin(col_url, a_tag["href"]).split("#")[0]
+
+      if content_pattern.search(full_url) and full_url not in article_urls:
+        article_urls.append(full_url)
+      elif (
+          column_pattern.search(full_url)
+          and full_url not in visited_columns
+          and full_url not in columns_to_visit
+      ):
+        columns_to_visit.append(full_url)
+
+  return article_urls
+
+
+def parse_article(index, url):
+  """解析單篇新聞內文頁的標題、內文與圖片（包含各項防重覆與過濾小圖規則）"""
+  print(f"📄 [{index}] 正在解析: {url}")
+  soup = get_soup(url)
+  if not soup:
+    return index, None
+
+  # 1. 移除干擾元素
+  for tag in soup(["script", "style", "iframe", "nav", "header", "footer"]):
+    tag.decompose()
+
+  # 2. 移除重複出現的版面預覽圖區塊
+  for tag in soup.find_all(
+      class_=re.compile(r"preview|paper-img-layout", re.I)
+  ):
+    tag.decompose()
+
+  title_tag = (
+      soup.find("h1")
+      or soup.find("h2")
+      or soup.find(class_=re.compile(r"title|headline", re.I))
+  )
+  title = title_tag.get_text(strip=True) if title_tag else "無標題新聞"
+
+  content_div = soup.find(
+      "div",
+      class_=re.compile(r"content|article|text|detail|founder", re.I),
+  )
+
+  paragraphs = []
+  images = []
+
+  target_area = content_div if content_div else soup.body
+  if target_area:
+    for p in target_area.find_all("p"):
+      text = p.get_text(strip=True)
+      if len(text) > 1:
+        paragraphs.append(text)
+
+    # 3. 篩選新聞內文圖片
+    for img in target_area.find_all("img", src=True):
+      img_src = urljoin(url, img["src"])
+
+      img_classes = img.get("class", [])
+      if isinstance(img_classes, list):
+        img_classes_str = " ".join(img_classes).lower()
+      else:
+        img_classes_str = str(img_classes).lower()
+
+      # 規則 1：過濾 paper-img-origin 且網址帶有 _s 的小縮圖
+      if "paper-img-origin" in img_classes_str and "_s" in img_src:
+        continue
+
+      # 規則 2：過濾預設頭像/小圖 woman.png
+      if "woman.png" in img_src.lower():
+        continue
+
+      # 規則 3：過濾其他通用 icon、logo、btn 等
+      if any(
+          kw in img_src.lower()
+          for kw in ["icon", "logo", "btn", "qr", "banner"]
+      ):
+        continue
+
+      images.append(img_src)
+
+  if not paragraphs:
+    return index, None
+
+  return index, {
+      "url": url,
+      "title": title,
+      "paragraphs": paragraphs,
+      "images": images,
+  }
+
+
+def build_html(articles, date_str):
+  """將所有新聞彙整成帶有目錄與 RSS 訂閱連結的精美閱讀網頁"""
+  toc_items = []
+  article_blocks = []
+
+  for idx, art in enumerate(articles, 1):
+    art_id = f"art-{idx}"
+    toc_items.append(f'<li><a href="#{art_id}">{idx}. {art["title"]}</a></li>')
+
+    imgs_html = "".join(
+        f'<img src="{src}" alt="新聞圖片" loading="lazy">'
+        for src in art["images"]
+    )
+    paras_html = "".join(f"<p>{p}</p>" for p in art["paragraphs"])
+
+    article_blocks.append(f"""
+        <article id="{art_id}" class="news-card">
+            <h2>{idx}. {art["title"]}</h2>
+            <div class="meta">
+                <a href="{art["url"]}" target="_blank" rel="noopener">查看原始頁面 ↗</a>
             </div>
-        </div>
-        """
-    toc_html += '</ul>'
+            {imgs_html}
+            <div class="news-text">
+                {paras_html}
+            </div>
+            <div class="back-top"><a href="#top">↑ 回到頂部目錄</a></div>
+        </article>
+        """)
 
-    return f"""
-    <!DOCTYPE html>
-    <html lang="zh-HK" style="scroll-behavior: smooth;">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>澳門日報 - {date_str}</title>
-        <style>
-            body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; color: #333; }}
-            .container {{ max-width: 800px; margin: 0 auto; }}
-            header {{ text-align: center; margin-bottom: 30px; }}
-            .toc-container {{ background: #ebebeb; padding: 20px; border-radius: 8px; margin-bottom: 40px; }}
-            img {{ max-width: 100%; height: auto; display: block; margin: 0 auto; border-radius: 4px; }}
-            @media (max-width: 600px) {{ body {{ padding: 10px; }} .toc-container {{ padding: 15px; }} }}
-        </style>
-    </head>
-    <body>
-        <div class="container" id="top">
-            <header>
-                <h1 style="color: #d32f2f; margin-bottom: 10px;">澳門日報 - {date_str}</h1>
-                <p style="margin: 0; color: #666;">更新時間：{now_str} (GMT+8)</p>
-                <p style="margin: 10px 0;"><a href="rss.xml" style="background: #ff6600; color: white; padding: 4px 12px; border-radius: 4px; text-decoration: none; font-size: 0.9em;">RSS 訂閱</a></p>
-            </header>
+  return f"""<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>澳門日報每日精讀 - {date_str}</title>
+    <link rel="alternate" type="application/rss+xml" title="澳門日報每日精讀 RSS" href="rss.xml" />
+    <style>
+        :root {{
+            --bg-color: #f5f5f0;
+            --card-bg: #ffffff;
+            --text-color: #2b2b2b;
+            --accent-color: #b71c1c;
+            --border-color: #e0dfd5;
+        }}
+        html {{ scroll-behavior: smooth; }}
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, "PingFang TC", "Microsoft JhengHei", sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.85;
+            margin: 0;
+            padding: 15px;
+        }}
+        .container {{ max-width: 820px; margin: 0 auto; }}
+        header {{
+            background: var(--card-bg); padding: 30px; border-radius: 12px;
+            text-align: center; box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+            margin-bottom: 24px; border-top: 5px solid var(--accent-color);
+        }}
+        header h1 {{ margin: 0 0 8px 0; color: var(--accent-color); font-size: 1.8rem; }}
+        .subtitle {{ color: #666; font-size: 0.95rem; margin-bottom: 15px; }}
+        .rss-btn {{
+            display: inline-block; background: #e67e22; color: white; padding: 6px 14px;
+            border-radius: 20px; text-decoration: none; font-size: 0.85rem; font-weight: bold;
+        }}
+        .rss-btn:hover {{ background: #d35400; }}
+        .toc {{
+            background: var(--card-bg); padding: 25px 30px; border-radius: 12px;
+            margin-bottom: 30px; box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }}
+        .toc h3 {{ margin-top: 0; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; color: #444; }}
+        .toc ul {{ list-style: none; padding: 0; margin: 0; }}
+        .toc li {{ margin-bottom: 10px; border-bottom: 1px dashed #eee; padding-bottom: 6px; }}
+        .toc a {{ text-decoration: none; color: #1a5276; font-weight: 500; }}
+        .toc a:hover {{ color: var(--accent-color); text-decoration: underline; }}
+        .news-card {{
+            background: var(--card-bg); padding: 35px 40px; border-radius: 12px;
+            margin-bottom: 28px; box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+        }}
+        .news-card h2 {{ margin-top: 0; color: #111; font-size: 1.45rem; line-height: 1.4; }}
+        .meta {{ font-size: 0.85rem; margin-bottom: 20px; }}
+        .meta a {{ color: #888; text-decoration: none; }}
+        .news-text p {{ text-indent: 2em; margin-bottom: 1.1em; font-size: 1.1rem; text-align: justify; }}
+        .news-card img {{ max-width: 100%; height: auto; display: block; margin: 20px auto; border-radius: 8px; }}
+        .back-top {{ text-align: right; margin-top: 20px; font-size: 0.85rem; }}
+        .back-top a {{ color: #888; text-decoration: none; }}
+        footer {{ text-align: center; color: #888; font-size: 0.85rem; padding: 20px 0 40px; }}
+        @media (max-width: 600px) {{
+            .news-card {{ padding: 22px 20px; }}
+            .toc {{ padding: 20px; }}
+            header h1 {{ font-size: 1.5rem; }}
+        }}
+    </style>
+</head>
+<body id="top">
+    <div class="container">
+        <header>
+            <h1>澳門日報每日精讀</h1>
+            <div class="subtitle">{date_str} ｜ 共收錄 {len(articles)} 篇報導</div>
+            <a href="rss.xml" target="_blank" class="rss-btn">📡 訂閱 RSS 頻訊</a>
+        </header>
 
-            <nav class="toc-container">
-                <h3 style="margin-top: 0; border-bottom: 1px solid #ccc; padding-bottom: 10px;">今日新聞目錄</h3>
-                {toc_html}
-            </nav>
+        <nav class="toc">
+            <h3>📑 當日新聞目錄</h3>
+            <ul>{''.join(toc_items)}</ul>
+        </nav>
+        <main>{''.join(article_blocks)}</main>
+        <footer>自動彙整於 {datetime.now(MACAU_TZ).strftime('%Y-%m-%d %H:%M:%S')} (澳門時間)</footer>
+    </div>
+</body>
+</html>
+"""
 
-            <main>
-                {articles_html}
-            </main>
-            
-            <footer style="text-align: center; color: #888; margin: 50px 0; font-size: 0.9em;">
-                本頁面由自動抓取程式生成，僅供個人閱讀參考。
-            </footer>
-        </div>
-    </body>
-    </html>
-    """
 
-def start_multi_threaded_crawler(target_url, feed_url, num_threads=8):
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0"
+def build_rss(articles, date_str):
+  """生成標準的 RSS 2.0 XML 內容"""
+  now_rfc822 = datetime.now(MACAU_TZ).strftime("%a, %d %b %Y %H:%M:%S +0800")
+  rss_items = []
+
+  for art in articles:
+    imgs_html = "".join(
+        f'<img src="{src}" style="max-width:100%; height:auto;" /><br>'
+        for src in art["images"]
+    )
+    paras_html = "".join(f"<p>{p}</p>" for p in art["paragraphs"])
+    full_content = f"{imgs_html}{paras_html}"
+
+    rss_items.append(f"""    <item>
+        <title><![CDATA[{art['title']}]]></title>
+        <link>{art['url']}</link>
+        <guid>{art['url']}</guid>
+        <pubDate>{now_rfc822}</pubDate>
+        <description><![CDATA[{full_content}]]></description>
+    </item>""")
+
+  rss_xml = f"""<?xml version="1.0" encoding="UTF-8" ?>
+<rss version="2.0">
+<channel>
+    <title><![CDATA[澳門日報每日精讀 - {date_str}]]></title>
+    <link>https://github.com</link>
+    <description><![CDATA[自動抓取、清理廣告並重新排版的澳門日報精選內容]]></description>
+    <language>zh-Hant</language>
+    <lastBuildDate>{now_rfc822}</lastBuildDate>
+    {''.join(rss_items)}
+</channel>
+</rss>"""
+  return rss_xml
+
+
+def main():
+  now = datetime.now(MACAU_TZ)
+  year_month = now.strftime("%Y%m")
+  day = now.strftime("%d")
+  date_str = now.strftime("%Y年%m月%d日")
+
+  start_url = (
+      f"https://nginx-amrb.modaily.cn/amrb/epaper/column/{year_month}/{day}/colA01.html"
+  )
+  print(f"🚀 開始執行 {date_str} 澳門日報多線程抓取任務：{start_url}")
+
+  article_urls = get_all_article_urls(start_url, year_month, day)
+  print(f"✅ 共找到 {len(article_urls)} 篇新聞連結")
+
+  if not article_urls:
+    print("⚠️ 今日尚未出報或找不到新聞連結，結束執行。")
+    return
+
+  results = []
+  max_workers = 10
+
+  print(f"⚡ 啟動多線程爬蟲，並行抓取中...")
+  with ThreadPoolExecutor(max_workers=max_workers) as executor:
+    future_to_url = {
+        executor.submit(parse_article, idx, url): url
+        for idx, url in enumerate(article_urls, 1)
     }
 
-    print(f"🔍 嘗試取得版面: {target_url}")
-    try:
-        res = requests.get(target_url, headers=headers, timeout=15)
-        if res.status_code != 200:
-            return None, None
+    for future in as_completed(future_to_url):
+      try:
+        idx, art_data = future.result()
+        if art_data:
+          results.append((idx, art_data))
+      except Exception as e:
+        print(f"❌ 執行緒發生例外錯誤: {e}")
 
-        res.encoding = 'utf-8'
-        soup = BeautifulSoup(res.text, 'html.parser')
-        
-        links = []
-        for a in soup.find_all('a', href=True):
-            if 'content_' in a['href']:
-                links.append(urljoin(target_url, a['href']))
-        
-        article_links = list(dict.fromkeys(links))
-        total = len(article_links)
-        
-        if total == 0: return None, None
+  results.sort(key=lambda x: x[0])
+  articles = [item[1] for item in results]
 
-        print(f"🚀 找到 {total} 篇文章，啟動 {num_threads} 線程處理中...")
-        results = []
-        with ThreadPoolExecutor(max_workers=num_threads) as executor:
-            future_to_url = {executor.submit(fetch_single_article, i, link, headers): i for i, link in enumerate(article_links)}
-            for future in as_completed(future_to_url):
-                results.append(future.result())
+  if articles:
+    # 直接輸出至專案根目錄
+    html_output_path = "index.html"
+    with open(html_output_path, "w", encoding="utf-8") as f:
+      f.write(build_html(articles, date_str))
+    print(f"🎉 成功生成網頁（根目錄）：{html_output_path}")
 
-        results.sort(key=lambda x: x[0])
+    rss_output_path = "rss.xml"
+    with open(rss_output_path, "w", encoding="utf-8") as f:
+      f.write(build_rss(articles, date_str))
+    print(f"📡 成功生成 RSS 訂閱檔（根目錄）：{rss_output_path}")
 
-        date_match = re.search(r'(\d{4}-\d{2}/\d{2})', target_url)
-        date_str = date_match.group(1) if date_match else "Archive"
-        
-        if date_match:
-            dt = datetime.datetime.strptime(date_str, "%Y-%m/%d")
-            tz = datetime.timezone(datetime.timedelta(hours=8))
-            pub_dt = dt.replace(tzinfo=tz, hour=8, minute=0)
-        else:
-            pub_dt = datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8)))
-        
-        rfc_date = email.utils.format_datetime(pub_dt)
-        last_build_date = email.utils.format_datetime(datetime.datetime.now(datetime.timezone(datetime.timedelta(hours=8))))
+  else:
+    print("❌ 未能成功解析任何新聞內文。")
 
-        # --- XML 輸出部分 (保持原封不動) ---
-        xml_parts = [
-            '<?xml version="1.0" encoding="UTF-8"?>',
-            '<rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:atom="http://www.w3.org/2005/Atom">',
-            '  <channel>',
-            f'    <title>澳門日報</title>',
-            f'    <link>https://www.macaodaily.com</link>',
-            '    <description>澳門日報當日新聞自動抓取訂閱源</description>',
-            '    <language>zh-hk</language>',
-            f'    <pubDate>{rfc_date}</pubDate>',
-            f'    <lastBuildDate>{last_build_date}</lastBuildDate>',
-            f'    <atom:link href="{feed_url}" rel="self" type="application/rss+xml" />',
-            '    <atom:link href="https://pubsubhubbub.appspot.com/" rel="hub" />'
-        ]
-
-        for r in results:
-            idx, title, link, content, summary = r
-            safe_title = saxutils.escape(title)
-            safe_link = saxutils.escape(link)
-            
-            xml_parts.append('    <item>')
-            xml_parts.append(f'      <title>{safe_title}</title>')
-            xml_parts.append(f'      <link>{safe_link}</link>')
-            xml_parts.append(f'      <guid isPermaLink="true">{safe_link}</guid>')
-            xml_parts.append(f'      <pubDate>{rfc_date}</pubDate>')
-            xml_parts.append(f'      <description><![CDATA[{summary}]]></description>')
-            xml_parts.append(f'      <content:encoded><![CDATA[{content}]]></content:encoded>')
-            xml_parts.append('    </item>')
-
-        xml_parts.append('  </channel>')
-        xml_parts.append('</rss>')
-        # --- XML 結束 ---
-
-        # 產生帶目錄的 HTML
-        html_content = generate_index_html(results, date_str)
-
-        return "\n".join(xml_parts), html_content
-
-    except Exception as e:
-        print(f"❌ 發生嚴重錯誤: {e}")
-        return None, None
 
 if __name__ == "__main__":
-    GITHUB_RAW_URL = "https://raw.githubusercontent.com/loukafai/AutoMacauNewsToRss/refs/heads/main/rss.xml"
-
-    tz = datetime.timezone(datetime.timedelta(hours=8))
-    now = datetime.datetime.now(tz)
-    
-    formatted_date = now.strftime("%Y-%m/%d")
-    today_url = f"https://www.macaodaily.com/html/{formatted_date}/node_1.htm"
-    
-    xml_content, html_content = start_multi_threaded_crawler(today_url, GITHUB_RAW_URL, num_threads=8)
-    
-    if not xml_content:
-        print("🔄 今天報紙尚未更新，自動退回嘗試抓取昨天的報紙...")
-        yesterday = now - datetime.timedelta(days=1)
-        formatted_date_yesterday = yesterday.strftime("%Y-%m/%d")
-        yesterday_url = f"https://www.macaodaily.com/html/{formatted_date_yesterday}/node_1.htm"
-        xml_content, html_content = start_multi_threaded_crawler(yesterday_url, GITHUB_RAW_URL, num_threads=8)
-    
-    if xml_content:
-        with open("rss.xml", "w", encoding="utf-8") as f:
-            f.write(xml_content)
-        print("✅ 成功生成 rss.xml！")
-        
-        if html_content:
-            with open("index.html", "w", encoding="utf-8") as f:
-                f.write(html_content)
-            print("✅ 成功生成帶目錄的 index.html！")
-        
-        ping_websub(GITHUB_RAW_URL)
+  main()
