@@ -42,3 +42,9 @@ jobs:
           git add rss.xml index.html
           git commit -m "📝 自動更新今日新聞 (RSS & HTML)" || exit 0
           git push
+          
+      - name: 📡 推送完成後再次通知 WebSub Hub
+        run: |
+          curl -s -X POST "https://pubsubhubbub.appspot.com/" \
+            -d "hub.mode=publish" \
+            -d "hub.url=https://raw.githubusercontent.com/loukafai/AutoMacauNewsToRss/refs/heads/main/rss.xml"
