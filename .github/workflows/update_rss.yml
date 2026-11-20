@@ -7,37 +7,38 @@ on:
     - cron: '0 21 * * *'
   workflow_dispatch: # 允許在 GitHub 網頁上手動點擊 "Run workflow" 執行
 
+permissions:
+  contents: write # 允許 Action 寫入與提交程式碼到 repo
+
 jobs:
   build:
     runs-on: ubuntu-latest
 
-    permissions:
-      contents: write # 允許 Action 寫入與提交程式碼到 repo
-
     steps:
-    - name: 📥 簽出程式碼 (Checkout repository)
-      uses: actions/checkout@v4
+      - name: 📥 簽出程式碼 (Checkout repository)
+        uses: actions/checkout@v7
 
-    - name: 🐍 設定 Python 環境
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-        cache: 'pip'
+      - name: 🐍 設定 Python 環境
+        uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+          cache: 'pip'
 
-    - name: 📦 安裝依賴套件
-      run: |
-        if [ -f requirements.txt ]; then
-          pip install -r requirements.txt
-        else
-          pip install requests beautifulsoup4
-        fi
+      - name: 📦 安裝依賴套件
+        run: |
+          if [ -f requirements.txt ]; then
+            pip install -r requirements.txt
+          else
+            pip install requests beautifulsoup4
+          fi
 
-    - name: 🚀 執行爬蟲腳本生成檔案
-      run: python main.py
+      - name: 🚀 執行爬蟲腳本生成檔案
+        run: python main.py
 
-    - name: 💾 提交並推送到 GitHub (Commit and Push)
-      uses: stefanzweifel/git-auto-commit-action@v5
-      with:
-        commit_message: "📝 自動更新今日新聞 (RSS & HTML)"
-        # 同時監控並提交這兩個檔案的變動
-        file_pattern: 'rss.xml index.html'
+      - name: 💾 提交並推送到 GitHub (Commit and Push)
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.io"
+          git add rss.xml index.html
+          git commit -m "📝 自動更新今日新聞 (RSS & HTML)" || exit 0
+          git push
