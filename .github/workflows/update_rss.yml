@@ -2,9 +2,10 @@ name: 每日自動更新澳門日報 RSS
 
 on:
   schedule:
-    # 澳門時間 07:00 (UTC+8) = UTC 23:00 (前一天)
-    # 格式：分 時 日 月 週
-    - cron: '0 21 * * *'
+    # 澳門時間 06:17 (UTC+8) = UTC 前一天 22:17
+    - cron: '17 22 * * *'
+    # 澳門時間 08:23 (UTC+8) = UTC 當天 00:23
+    - cron: '23 0 * * *'
   workflow_dispatch: # 允許在 GitHub 網頁上手動點擊 "Run workflow" 執行
 
 permissions:
@@ -42,9 +43,10 @@ jobs:
           git add rss.xml index.html
           git commit -m "📝 自動更新今日新聞 (RSS & HTML)" || exit 0
           git push
-          
+
       - name: 📡 推送完成後再次通知 WebSub Hub
         run: |
-          curl -s -X POST "https://pubsubhubbub.appspot.com/" \
+          curl -sS --connect-timeout 10 --max-time 20 --retry 2 --retry-delay 2 \
+            -X POST "https://pubsubhubbub.appspot.com/" \
             -d "hub.mode=publish" \
-            -d "hub.url=https://raw.githubusercontent.com/loukafai/AutoMacauNewsToRss/refs/heads/main/rss.xml"
+            -d "hub.url=https://raw.githubusercontent.com/loukafai/AutoMacauNewsToRss/refs/heads/main/rss.xml" || true
