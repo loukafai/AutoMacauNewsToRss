@@ -4,8 +4,8 @@ import os
 import re
 import time
 from urllib.parse import urljoin
-import requests
 from bs4 import BeautifulSoup
+import requests
 
 # 設定澳門時區 (UTC+8)
 MACAU_TZ = timezone(timedelta(hours=8))
@@ -28,6 +28,21 @@ def get_soup(url):
   except Exception as e:
     print(f"❌ 請求錯誤 {url}: {e}")
   return None
+
+
+def is_today_already_crawled(html_path, date_str):
+  """檢查現存 index.html 的 <title> 是否已記錄當日新聞"""
+  if not os.path.exists(html_path):
+    return False
+  try:
+    with open(html_path, "r", encoding="utf-8") as f:
+      soup = BeautifulSoup(f.read(), "html.parser")
+    title_text = soup.title.get_text(strip=True) if soup.title else ""
+    expected_prefix = "澳門日報每日精讀"
+    return expected_prefix in title_text and date_str in title_text
+  except Exception as e:
+    print(f"⚠️ 讀取現有 {html_path} 發生錯誤，將重新抓取: {e}")
+    return False
 
 
 def ping_websub(feed_url):
@@ -311,11 +326,22 @@ def build_rss(articles, date_str, feed_url):
 def main():
   # 請替換為你真實的 GitHub raw rss.xml 網址
   GITHUB_RAW_URL = "https://raw.githubusercontent.com/loukafai/AutoMacauNewsToRss/main/rss.xml"
+  html_output_path = "index.html"
+  rss_output_path = "rss.xml"
 
   now = datetime.now(MACAU_TZ)
   year_month = now.strftime("%Y%m")
   day = now.strftime("%d")
   date_str = now.strftime("%Y年%m月%d日")
+
+  # 抓新聞前先檢查根目錄 index.html 是否已包含當日標題
+  if is_today_already_crawled(html_output_path, date_str):
+    print(
+        f"⏭️ 偵測到 {html_output_path} 已包含「澳門日報每日精讀 - {date_str}」"
+        "，跳過抓取與寫檔，僅執行 WebSub 推播通知。"
+    )
+    ping_websub(GITHUB_RAW_URL)
+    return
 
   start_url = (
       f"https://nginx-amrb.modaily.cn/amrb/epaper/column/{year_month}/{day}/colA01.html"
@@ -352,12 +378,10 @@ def main():
 
   if articles:
     # 直接輸出至專案根目錄
-    html_output_path = "index.html"
     with open(html_output_path, "w", encoding="utf-8") as f:
       f.write(build_html(articles, date_str))
     print(f"🎉 成功生成網頁（根目錄）：{html_output_path}")
 
-    rss_output_path = "rss.xml"
     with open(rss_output_path, "w", encoding="utf-8") as f:
       f.write(build_rss(articles, date_str, GITHUB_RAW_URL))
     print(f"📡 成功生成 RSS 訂閱檔（根目錄）：{rss_output_path}")
