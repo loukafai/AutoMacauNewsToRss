@@ -9,6 +9,10 @@ on:
 permissions:
   contents: write # 允許 Action 寫入與提交程式碼到 repo
 
+concurrency:
+  group: macau-daily-rss-update
+  cancel-in-progress: false
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -43,12 +47,15 @@ jobs:
             echo "ℹ️ rss.xml 與 index.html 無變更，略過 commit 與 push。"
           else
             git commit -m "📝 自動更新今日新聞 (RSS & HTML)"
+            git pull --rebase --autostash origin "$(git rev-parse --abbrev-ref HEAD)"
             git push
           fi
 
       - name: 📡 推送完成後再次通知 WebSub Hub
         run: |
+          sleep 5
           curl -sS --connect-timeout 10 --max-time 20 --retry 2 --retry-delay 2 \
+            -w "\nHTTP_STATUS:%{http_code}\n" \
             -X POST "https://pubsubhubbub.appspot.com/" \
             -d "hub.mode=publish" \
-            -d "hub.url=https://raw.githubusercontent.com/loukafai/AutoMacauNewsToRss/refs/heads/main/rss.xml" || true
+            -d "hub.url=https://raw.githubusercontent.com/loukafai/AutoMacauNewsToRss/main/rss.xml" || true
